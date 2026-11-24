@@ -42,50 +42,68 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             lastPass = savedCreds.second
             isRememberMe = true
 
-            // If Remember Me was on, show cached attendance immediately if available
+            // If Remember Me was on, only load cache if it matches saved roll number
             val cached = CacheManager.loadCache(getApplication())
-            if (cached != null) {
+            if (cached != null && (cached.rollNo == null || cached.rollNo.equals(lastRollNo, ignoreCase = true))) {
                 _ui.value = UiState.Success(
                     months = cached.months,
                     semester = cached.semester,
                     lastUpdated = cached.lastUpdated,
                     studentName = cached.studentName
                 )
+            } else if (cached != null) {
+                // Roll number mismatch in cache: clear stale cache immediately
+                CacheManager.clearCache(getApplication())
             }
             // Auto login / background refresh with saved credentials
             login(lastRollNo, lastPass, rememberMe = true)
         } else {
             // With "Remember me" off, reopening the app must not show a dashboard that can't refresh.
-            // It should ask the user to log in again.
+            // Clear any stale cache and ask the user to log in again.
+            CacheManager.clearCache(getApplication())
             _ui.value = UiState.Idle
         }
     }
 
     fun login(roll: String, pass: String, rememberMe: Boolean = false) {
-        if (roll.isBlank() || pass.isBlank()) return
-        lastRollNo = roll
+        val trimmedRoll = roll.trim()
+        if (trimmedRoll.isBlank() || pass.isBlank()) return
+
+        val cached = CacheManager.loadCache(getApplication())
+        val isDifferentUser = (lastRollNo.isNotBlank() && !lastRollNo.equals(trimmedRoll, ignoreCase = true)) ||
+                (cached?.rollNo != null && !cached.rollNo.equals(trimmedRoll, ignoreCase = true))
+
+        if (isDifferentUser) {
+            // Delete old cached name and attendance BEFORE showing anything,
+            // so the new user can never see the previous user's data, even for a moment.
+            CacheManager.clearCache(getApplication())
+            CacheManager.clearRememberMe(getApplication())
+            _ui.value = UiState.Loading
+        }
+
+        lastRollNo = trimmedRoll
         lastPass = pass
         isRememberMe = rememberMe
 
         // Handle Remember Me storage
         if (rememberMe) {
-            CacheManager.saveRememberMe(getApplication(), roll, pass)
+            CacheManager.saveRememberMe(getApplication(), trimmedRoll, pass)
         } else {
             CacheManager.clearRememberMe(getApplication())
         }
 
         val currentState = _ui.value
-        if (currentState is UiState.Success) {
-            // Already showing cached data, perform background refresh
+        if (!isDifferentUser && currentState is UiState.Success) {
+            // Same user and already showing cached data: perform background refresh
             _ui.value = currentState.copy(isRefreshing = true, refreshError = null)
             viewModelScope.launch(Dispatchers.IO) {
-                performFetch(roll, pass, isBackground = true)
+                performFetch(trimmedRoll, pass, isBackground = true)
             }
         } else {
-            // No cache shown, show full loading state
+            // Different user or no cache shown: show full loading state
             _ui.value = UiState.Loading
             viewModelScope.launch(Dispatchers.IO) {
-                performFetch(roll, pass, isBackground = false)
+                performFetch(trimmedRoll, pass, isBackground = false)
             }
         }
     }
@@ -94,7 +112,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         when (val result = client.loginAndFetch(roll, pass)) {
             is LoginResult.Success -> {
                 val now = System.currentTimeMillis()
-                val existingName = (_ui.value as? UiState.Success)?.studentName
+                // Name comes freshly from the portal; fallback to existing only if same user
+                val existingName = if (isBackground) (_ui.value as? UiState.Success)?.studentName else null
                 val finalName = result.studentName ?: existingName
 
                 val cache = CachedAttendance(
@@ -102,7 +121,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     semester = result.semester,
                     lastUpdated = now,
                     fetchSuccessful = true,
-                    studentName = finalName
+                    studentName = finalName,
+                    rollNo = roll
                 )
                 CacheManager.saveCache(getApplication(), cache)
 

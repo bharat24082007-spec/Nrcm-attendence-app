@@ -170,7 +170,7 @@ fun LoginScreen(
                         value = roll,
                         onValueChange = { roll = it },
                         label = { Text("Roll Number") },
-                        placeholder = { Text("e.g. 25X01A6229") },
+                        placeholder = { Text("Enter roll number") },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,

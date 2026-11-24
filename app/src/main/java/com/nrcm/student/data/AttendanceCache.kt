@@ -14,7 +14,8 @@ data class CachedAttendance(
     val semester: SemesterSummary,
     val lastUpdated: Long, // epoch millis
     val fetchSuccessful: Boolean,
-    val studentName: String? = null
+    val studentName: String? = null,
+    val rollNo: String? = null
 )
 
 // Cache helper with EncryptedSharedPreferences for Remember Me
@@ -56,7 +57,7 @@ object CacheManager {
         }
     }
 
-    // Clear cached attendance data on logout
+    // Clear cached attendance data on logout or user switch
     fun clearCache(context: Context) {
         try {
             context
