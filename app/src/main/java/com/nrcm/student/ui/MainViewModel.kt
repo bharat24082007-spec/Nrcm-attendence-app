@@ -20,7 +20,8 @@ sealed class UiState {
         val semester: SemesterSummary,
         val isRefreshing: Boolean = false,
         val lastUpdated: Long? = null,
-        val refreshError: String? = null
+        val refreshError: String? = null,
+        val studentName: String? = null
     ) : UiState()
 }
 
@@ -47,7 +48,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _ui.value = UiState.Success(
                     months = cached.months,
                     semester = cached.semester,
-                    lastUpdated = cached.lastUpdated
+                    lastUpdated = cached.lastUpdated,
+                    studentName = cached.studentName
                 )
             }
             // Auto login / background refresh with saved credentials
@@ -92,11 +94,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         when (val result = client.loginAndFetch(roll, pass)) {
             is LoginResult.Success -> {
                 val now = System.currentTimeMillis()
+                val existingName = (_ui.value as? UiState.Success)?.studentName
+                val finalName = result.studentName ?: existingName
+
                 val cache = CachedAttendance(
                     months = result.months,
                     semester = result.semester,
                     lastUpdated = now,
-                    fetchSuccessful = true
+                    fetchSuccessful = true,
+                    studentName = finalName
                 )
                 CacheManager.saveCache(getApplication(), cache)
 
@@ -105,7 +111,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     semester = result.semester,
                     isRefreshing = false,
                     lastUpdated = now,
-                    refreshError = null
+                    refreshError = null,
+                    studentName = finalName
                 )
             }
             LoginResult.WrongCredentials -> {

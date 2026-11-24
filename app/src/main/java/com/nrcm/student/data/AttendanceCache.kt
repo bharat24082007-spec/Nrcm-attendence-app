@@ -13,7 +13,8 @@ data class CachedAttendance(
     val months: List<MonthRecord>,
     val semester: SemesterSummary,
     val lastUpdated: Long, // epoch millis
-    val fetchSuccessful: Boolean
+    val fetchSuccessful: Boolean,
+    val studentName: String? = null
 )
 
 // Cache helper with EncryptedSharedPreferences for Remember Me
@@ -22,10 +23,16 @@ object CacheManager {
     private const val KEY_CACHED_DATA = "cached_attendance"
     private const val KEY_LAST_REFRESH = "last_refresh"
 
+    private val jsonConfig = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        encodeDefaults = true
+    }
+
     // Save cached attendance data
     fun saveCache(context: Context, data: CachedAttendance) {
         try {
-            val json = Json.encodeToString(data)
+            val json = jsonConfig.encodeToString(data)
             context
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit()
@@ -42,7 +49,7 @@ object CacheManager {
         try {
             val sharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val json = sharedPrefs.getString(KEY_CACHED_DATA, null)
-            return if (json != null) Json.decodeFromString<CachedAttendance>(json) else null
+            return if (json != null) jsonConfig.decodeFromString<CachedAttendance>(json) else null
         } catch (e: Exception) {
             // Silently fail
             return null

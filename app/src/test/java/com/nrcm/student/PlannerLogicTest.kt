@@ -91,4 +91,34 @@ class PlannerLogicTest {
         val est = estimateTargetDate(8, cal)
         assertTrue(est.isNotBlank())
     }
+
+    @Test
+    fun testFormatStudentName() {
+        assertEquals("Desineedi Bharat Charan", com.nrcm.student.network.formatStudentName("DESINEEDI BHARAT CHARAN"))
+        assertEquals("Desineedi Bharat Charan", com.nrcm.student.network.formatStudentName("  DESINEEDI   BHARAT  CHARAN  "))
+        assertEquals("Mary-Jane O'Connor", com.nrcm.student.network.formatStudentName("MARY-JANE O'CONNOR"))
+        assertEquals("A.B. Charan", com.nrcm.student.network.formatStudentName("A.B. CHARAN"))
+    }
+
+    @Test
+    fun testParseStudentNameWithH2AndBadge() {
+        val html = """
+            <span id="name"><h2> DESINEEDI BHARAT CHARAN
+                <span class="admission-tag">Convenor</span></h2></span>
+        """.trimIndent()
+        val doc = org.jsoup.Jsoup.parse(html)
+        val name = com.nrcm.student.network.parseStudentName(doc)
+        assertEquals("Desineedi Bharat Charan", name)
+    }
+
+    @Test
+    fun testParseStudentNameWithoutH2() {
+        val html = """
+            <span id="name"> DESINEEDI BHARAT CHARAN
+                <span class="admission-tag">Convenor</span></span>
+        """.trimIndent()
+        val doc = org.jsoup.Jsoup.parse(html)
+        val name = com.nrcm.student.network.parseStudentName(doc)
+        assertEquals("Desineedi Bharat Charan", name)
+    }
 }

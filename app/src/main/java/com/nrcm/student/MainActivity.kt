@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
                         is UiState.Success -> DashboardScreen(
                             months = s.months,
                             semester = s.semester,
+                            studentName = s.studentName,
                             onLogout = { vm.logout() },
                             onRefresh = { vm.refresh() },
                             isRefreshing = s.isRefreshing,

@@ -20,11 +20,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nrcm.student.PlannerStatus
@@ -1235,13 +1238,58 @@ fun PlannerTab(
 // TOP BAR & ABOUT DIALOG
 // ==========================================
 @Composable
+fun AutoSizingTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    maxFontSize: TextUnit = 20.sp,
+    minFontSize: TextUnit = 14.sp
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val baseStyle = MaterialTheme.typography.titleLarge.copy(
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 0.5.sp,
+        color = NrcmTheme.TextPrimary
+    )
+
+    BoxWithConstraints(modifier = modifier) {
+        val maxWidthPx = with(density) { maxWidth.toPx() }
+        var chosenSize = minFontSize
+
+        for (size in maxFontSize.value.toInt() downTo minFontSize.value.toInt()) {
+            val candidate = size.sp
+            val measured = textMeasurer.measure(
+                text = text,
+                style = baseStyle.copy(fontSize = candidate),
+                maxLines = 1
+            )
+            if (measured.size.width <= maxWidthPx) {
+                chosenSize = candidate
+                break
+            }
+            chosenSize = candidate
+        }
+
+        Text(
+            text = text,
+            style = baseStyle.copy(fontSize = chosenSize),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
 fun TopBar(
     onLogout: () -> Unit,
     onRefresh: () -> Unit,
     onAbout: () -> Unit,
+    studentName: String? = null,
     isRefreshing: Boolean = false,
     lastUpdated: Long? = null
 ) {
+    val titleText = studentName?.takeIf { it.isNotBlank() } ?: "NRCM STUDENT"
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1256,35 +1304,35 @@ fun TopBar(
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "NRCM STUDENT",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = NrcmTheme.TextPrimary
+                AutoSizingTitle(
+                    text = titleText,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onAbout) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "About",
-                        tint = NrcmTheme.TextSecondary
-                    )
-                }
-                IconButton(onClick = onRefresh, enabled = !isRefreshing) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = if (isRefreshing) NrcmTheme.TextMuted else NrcmTheme.Primary
-                    )
-                }
-                TextButton(onClick = onLogout) {
-                    Text(
-                        text = "Logout",
-                        color = NrcmTheme.AbsentRed,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = onAbout) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "About",
+                            tint = NrcmTheme.TextSecondary
+                        )
+                    }
+                    IconButton(onClick = onRefresh, enabled = !isRefreshing) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = if (isRefreshing) NrcmTheme.TextMuted else NrcmTheme.Primary
+                        )
+                    }
+                    TextButton(onClick = onLogout) {
+                        Text(
+                            text = "Logout",
+                            color = NrcmTheme.AbsentRed,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
             if (isRefreshing) {
@@ -1342,6 +1390,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
 fun DashboardScreen(
     months: List<MonthRecord>,
     semester: SemesterSummary,
+    studentName: String? = null,
     onLogout: () -> Unit,
     onRefresh: () -> Unit,
     isRefreshing: Boolean = false,
@@ -1361,6 +1410,7 @@ fun DashboardScreen(
                 onLogout = onLogout,
                 onRefresh = onRefresh,
                 onAbout = { showAbout = true },
+                studentName = studentName,
                 isRefreshing = isRefreshing,
                 lastUpdated = lastUpdated
             )

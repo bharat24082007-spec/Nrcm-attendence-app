@@ -1,6 +1,8 @@
 package com.nrcm.student.network
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -12,7 +14,48 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import com.nrcm.student.data.*
 import java.io.IOException
+import java.util.Locale
 import java.util.concurrent.TimeUnit
+
+fun formatStudentName(rawName: String): String {
+    val cleaned = rawName.trim().replace(Regex("\\s+"), " ").lowercase(Locale.US)
+    if (cleaned.isEmpty()) return ""
+
+    val sb = StringBuilder(cleaned.length)
+    var capitalizeNext = true
+
+    for (ch in cleaned) {
+        if (capitalizeNext && ch.isLetter()) {
+            sb.append(ch.titlecaseChar())
+            capitalizeNext = false
+        } else {
+            sb.append(ch)
+            if (ch == ' ' || ch == '-' || ch == '\'' || ch == '.') {
+                capitalizeNext = true
+            }
+        }
+    }
+    return sb.toString()
+}
+
+fun parseStudentName(doc: Document): String? {
+    val h2 = doc.selectFirst("#name h2")
+    val rawName = if (h2 != null) {
+        h2.ownText()
+    } else {
+        val nameSpan = doc.getElementById("name")
+        if (nameSpan != null) {
+            val clone = nameSpan.clone()
+            clone.select(".admission-tag").remove()
+            clone.text()
+        } else {
+            null
+        }
+    }
+    if (rawName.isNullOrBlank()) return null
+    val formatted = formatStudentName(rawName)
+    return if (formatted.isNotBlank()) formatted else null
+}
 
 class PortalClient {
     private val cookieJar = object : CookieJar {
@@ -42,15 +85,45 @@ class PortalClient {
             val loginReq = Request.Builder().url("https://www.nrcmec.org/Student/login.php").post(form).build()
             http.newCall(loginReq).execute().close()
 
-            val attReq = Request.Builder().url("https://www.nrcmec.org/Student/Date_wise_attendance").build()
-            val resp = http.newCall(attReq).execute()
-            val html = resp.body?.string() ?: ""
-            resp.close()
+            // Run attendance fetch and index/name fetch in parallel
+            coroutineScope {
+                val attDeferred = async {
+                    try {
+                        val attReq = Request.Builder().url("https://www.nrcmec.org/Student/Date_wise_attendance").build()
+                        val resp = http.newCall(attReq).execute()
+                        val html = resp.body?.string() ?: ""
+                        resp.close()
+                        val doc = Jsoup.parse(html)
+                        if (doc.getElementById("monthTabsContent") == null) null
+                        else parseAttendance(doc)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
 
-            val doc = Jsoup.parse(html)
-            if (doc.getElementById("monthTabsContent") == null) return@withContext LoginResult.WrongCredentials
-            val (months, sem) = parseAttendance(doc)
-            LoginResult.Success(months, sem)
+                val nameDeferred = async {
+                    try {
+                        val nameReq = Request.Builder().url("https://www.nrcmec.org/Student/index").build()
+                        val resp = http.newCall(nameReq).execute()
+                        val html = resp.body?.string() ?: ""
+                        resp.close()
+                        val doc = Jsoup.parse(html)
+                        parseStudentName(doc)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+
+                val attResult = attDeferred.await()
+                val studentName = nameDeferred.await()
+
+                if (attResult == null) {
+                    LoginResult.WrongCredentials
+                } else {
+                    val (months, sem) = attResult
+                    LoginResult.Success(months, sem, studentName)
+                }
+            }
         } catch (e: IOException) { LoginResult.NetworkError }
         catch (e: Exception) { LoginResult.NetworkError }
     }
