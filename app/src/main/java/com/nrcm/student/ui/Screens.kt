@@ -74,7 +74,7 @@ object NrcmTheme {
 }
 
 // ==========================================
-// 1. LOGIN SCREEN (Modern, Minimal & Premium)
+// 1. LOGIN SCREEN (Refined, Clean & Responsive)
 // ==========================================
 @Composable
 fun LoginScreen(
@@ -97,18 +97,18 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp)
+                .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            // Branding Icon & Card
+            // Branding Icon & Emblem
             Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .shadow(12.dp, CircleShape, spotColor = NrcmTheme.Primary.copy(alpha = 0.3f))
+                    .size(76.dp)
+                    .shadow(10.dp, CircleShape, spotColor = NrcmTheme.Primary.copy(alpha = 0.3f))
                     .background(
                         brush = Brush.linearGradient(
                             listOf(NrcmTheme.Primary, NrcmTheme.AccentBlue)
@@ -121,20 +121,22 @@ fun LoginScreen(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = "Logo",
                     tint = Color.White,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(38.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
                 text = "NRCM STUDENT",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = 1.sp
                 ),
                 color = NrcmTheme.TextPrimary
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Attendance & Academic Portal",
@@ -142,14 +144,14 @@ fun LoginScreen(
                 color = NrcmTheme.TextSecondary
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Login Card Container
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(8.dp, RoundedCornerShape(20.dp), spotColor = Color(0x1A000000)),
-                shape = RoundedCornerShape(20.dp),
+                    .shadow(6.dp, RoundedCornerShape(16.dp), spotColor = Color(0x14000000)),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
             ) {
                 Column(
@@ -163,21 +165,14 @@ fun LoginScreen(
                         color = NrcmTheme.TextPrimary
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                    // Roll Number Field
+                    // Roll Number Field (Clean, no overlapping leading icon)
                     OutlinedTextField(
                         value = roll,
                         onValueChange = { roll = it },
                         label = { Text("Roll Number") },
                         placeholder = { Text("Enter roll number") },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Roll Number",
-                                tint = NrcmTheme.Primary
-                            )
-                        },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -190,19 +185,12 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Password Field
+                    // Password Field (Clean with eye toggle on right)
                     OutlinedTextField(
                         value = pass,
                         onValueChange = { pass = it },
                         label = { Text("Password") },
                         placeholder = { Text("Enter password") },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Password",
-                                tint = NrcmTheme.Primary
-                            )
-                        },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
@@ -225,7 +213,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Remember Me
+                    // Remember Me Checkbox
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -248,21 +236,26 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Login Button
+                    // Enabled/Polished Login Button
+                    val isFormValid = roll.isNotBlank() && pass.isNotBlank()
                     Button(
                         onClick = { onLogin(roll.trim(), pass, isRemembered) },
-                        enabled = !loading && roll.isNotBlank() && pass.isNotBlank(),
-                        shape = RoundedCornerShape(14.dp),
+                        enabled = !loading && isFormValid,
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = NrcmTheme.Primary,
                             contentColor = Color.White,
-                            disabledContainerColor = NrcmTheme.Primary.copy(alpha = 0.45f),
+                            disabledContainerColor = NrcmTheme.Primary.copy(alpha = 0.4f),
                             disabledContentColor = Color.White.copy(alpha = 0.8f)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp)
-                            .shadow(if (roll.isNotBlank() && pass.isNotBlank()) 6.dp else 0.dp, RoundedCornerShape(14.dp), spotColor = NrcmTheme.Primary.copy(alpha = 0.4f))
+                            .height(50.dp)
+                            .shadow(
+                                elevation = if (isFormValid && !loading) 4.dp else 0.dp,
+                                shape = RoundedCornerShape(12.dp),
+                                spotColor = NrcmTheme.Primary.copy(alpha = 0.4f)
+                            )
                     ) {
                         if (loading) {
                             CircularProgressIndicator(
@@ -308,13 +301,13 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
 
 // ==========================================
-// STAT CARD WITH BLUE LEFT ACCENT (From Web UI)
+// STAT CARD WITH BLUE LEFT ACCENT (Unified)
 // ==========================================
 @Composable
 fun StatCard(
@@ -325,16 +318,17 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier
-            .shadow(3.dp, RoundedCornerShape(12.dp), spotColor = Color(0x10000000)),
+            .heightIn(min = 72.dp)
+            .shadow(2.dp, RoundedCornerShape(12.dp), spotColor = Color(0x0D000000)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)
+                .fillMaxHeight()
         ) {
-            // Left blue vertical accent line (signature element from website screenshots)
+            // Left blue vertical accent line (signature college UI)
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -346,22 +340,26 @@ fun StatCard(
             )
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                    .padding(start = 10.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
                     .fillMaxWidth()
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
                     color = NrcmTheme.TextSecondary,
                     fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = valueColor,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -369,7 +367,7 @@ fun StatCard(
 }
 
 // ==========================================
-// 2. MONTHS / ATTENDANCE PAGE (Exact Table)
+// 2. MONTHS / ATTENDANCE PAGE
 // ==========================================
 @Composable
 fun MonthsTab(
@@ -397,14 +395,14 @@ fun MonthsTab(
             .fillMaxSize()
             .background(NrcmTheme.Background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         // Heading Banner
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(14.dp)),
-            shape = RoundedCornerShape(14.dp),
+                .shadow(3.dp, RoundedCornerShape(12.dp)),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
             Box(
@@ -444,7 +442,7 @@ fun MonthsTab(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Month Selection Tabs with Badges (Only from parsed div.tab-pane, no hardcoded months)
+        // Month Selection Tabs with Badges & Clear Underline Indicator
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -457,48 +455,71 @@ fun MonthsTab(
                 val badgeBg = if (isGood) NrcmTheme.PresentGreen else NrcmTheme.WarningAmber
                 val displayName = m.name.replace("-", " ")
 
-                Card(
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) NrcmTheme.PrimaryLight else NrcmTheme.CardBg
-                    ),
-                    modifier = Modifier
-                        .clickable { selectedIndex = idx }
-                        .border(
-                            width = if (isSelected) 1.5.dp else 1.dp,
-                            color = if (isSelected) NrcmTheme.Primary else NrcmTheme.Border,
-                            shape = RoundedCornerShape(10.dp)
-                        )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(bottom = 2.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    Card(
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) NrcmTheme.PrimaryLight else NrcmTheme.CardBg
+                        ),
+                        modifier = Modifier
+                            .clickable { selectedIndex = idx }
+                            .border(
+                                width = if (isSelected) 1.5.dp else 1.dp,
+                                color = if (isSelected) NrcmTheme.Primary else NrcmTheme.Border,
+                                shape = RoundedCornerShape(10.dp)
+                            )
                     ) {
-                        Text(
-                            text = displayName,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            ),
-                            color = if (isSelected) NrcmTheme.Primary else NrcmTheme.TextPrimary
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(badgeBg, shape = RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Text(
-                                text = String.format(Locale.US, "%.2f%%", m.percent),
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
+                                text = displayName,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                ),
+                                color = if (isSelected) NrcmTheme.Primary else NrcmTheme.TextPrimary
                             )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .background(badgeBg, shape = RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = String.format(Locale.US, "%.2f%%", m.percent),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White
+                                )
+                            }
                         }
+                    }
+
+                    // Visual underline for selected month (college website style)
+                    if (isSelected) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(3.dp)
+                                .background(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(NrcmTheme.Primary, NrcmTheme.AccentBlue)
+                                    ),
+                                    shape = RoundedCornerShape(2.dp)
+                                )
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(7.dp))
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Top 3 Stats Cards (Present | Total Classes | Percentage)
         Row(
@@ -529,11 +550,10 @@ fun MonthsTab(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Date-wise Attendance Table (EXACT Website Structure: Date | P1 | P2 | P3 | P4 | P5 | P6)
-        // With newest date first
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(12.dp)),
+                .shadow(3.dp, RoundedCornerShape(12.dp)),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
@@ -545,7 +565,7 @@ fun MonthsTab(
                         Row(
                             modifier = Modifier
                                 .background(NrcmTheme.AccentBlue)
-                                .padding(vertical = 12.dp),
+                                .padding(vertical = 11.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
@@ -594,8 +614,8 @@ fun MonthsTab(
                                 Row(
                                     modifier = Modifier
                                         .background(rowBg)
-                                        .border(width = 0.5.dp, color = NrcmTheme.Border)
-                                        .padding(vertical = 8.dp),
+                                        .border(width = 0.5.dp, color = NrcmTheme.BorderLight)
+                                        .padding(vertical = 9.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     // Date Cell
@@ -643,7 +663,7 @@ fun MonthsTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
     }
 }
 
@@ -661,14 +681,14 @@ fun SummaryTab(
             .fillMaxSize()
             .background(NrcmTheme.Background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         // Monthly Summary Table Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(14.dp)),
-            shape = RoundedCornerShape(14.dp),
+                .shadow(3.dp, RoundedCornerShape(12.dp)),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -704,7 +724,7 @@ fun SummaryTab(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(NrcmTheme.TablePurple)
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 11.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -747,7 +767,7 @@ fun SummaryTab(
                             .fillMaxWidth()
                             .background(rowBg)
                             .border(width = 0.5.dp, color = NrcmTheme.BorderLight)
-                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                            .padding(horizontal = 12.dp, vertical = 11.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -780,13 +800,13 @@ fun SummaryTab(
                     }
                 }
 
-                // Semester Total Row
+                // Semester Total Row (Highlighted in cyan/sky blue like college site)
                 val semColor = if (semester.percent >= 75f) NrcmTheme.PresentGreen else NrcmTheme.AbsentRed
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(NrcmTheme.SemesterRowBg)
-                        .padding(horizontal = 12.dp, vertical = 14.dp),
+                        .padding(horizontal = 12.dp, vertical = 13.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -820,28 +840,28 @@ fun SummaryTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 4. Semester Summary Section
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = null,
                 tint = NrcmTheme.Primary,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Semester Summary",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = NrcmTheme.TextPrimary
             )
         }
 
-        // Three Summary Cards (Total Present | Total Classes | Overall Percentage)
+        // Three Summary Cards (Identical alignment & styling as Months screen)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -894,7 +914,7 @@ fun SummaryTab(
                     imageVector = if (isGoodAttendance) Icons.Default.CheckCircle else Icons.Default.Warning,
                     contentDescription = null,
                     tint = if (isGoodAttendance) NrcmTheme.PresentGreen else NrcmTheme.AbsentRed,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -909,51 +929,17 @@ fun SummaryTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
     }
 }
 
 // ==========================================
-// 6. PLANNER PAGE
+// 6. PLANNER PAGE (Polished, No Meme Slot)
 // ==========================================
-@Composable
-fun MemeArea(status: Status, showMemes: Boolean = true) {
-    if (!showMemes) return
-
-    val memeText = when (status) {
-        Status.SAFE -> "SAFE: Chill mode activated 🏖️"
-        Status.CLOSE -> "CLOSE: Danger zone ⚠️"
-        Status.BELOW -> "BELOW: Time to run to class 🏃‍♂️"
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = NrcmTheme.SurfaceMuted)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp, horizontal = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "[Meme Slot: $memeText]",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                textAlign = TextAlign.Center,
-                color = NrcmTheme.TextSecondary
-            )
-        }
-    }
-}
-
 @Composable
 fun PlannerProgressRing(
     plannerStatus: PlannerStatus,
-    total: Int,
-    showMemes: Boolean = true
+    total: Int
 ) {
     // Ring colour: green for SAFE, amber for CLOSE, red for BELOW
     val ringColor = when (plannerStatus.status) {
@@ -966,11 +952,11 @@ fun PlannerProgressRing(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Circular Gauge Card
+        // Refined Circular Attendance Gauge Card
         Card(
             modifier = Modifier
-                .size(190.dp)
-                .shadow(6.dp, CircleShape),
+                .size(180.dp)
+                .shadow(4.dp, CircleShape, spotColor = ringColor.copy(alpha = 0.25f)),
             shape = CircleShape,
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
@@ -984,17 +970,17 @@ fun PlannerProgressRing(
                     progress = if (total == 0) 0f else (plannerStatus.percent / 100f).coerceIn(0f, 1f),
                     modifier = Modifier.fillMaxSize(),
                     color = if (total == 0) NrcmTheme.TextMuted else ringColor,
-                    strokeWidth = 14.dp,
+                    strokeWidth = 12.dp,
                     trackColor = (if (total == 0) NrcmTheme.TextMuted else ringColor).copy(alpha = 0.15f)
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = if (total == 0) "0.00%" else String.format(Locale.US, "%.2f%%", plannerStatus.percent),
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = NrcmTheme.TextPrimary
                     )
                     Text(
-                        text = "Current",
+                        text = "Overall Attendance",
                         style = MaterialTheme.typography.labelSmall,
                         color = NrcmTheme.TextSecondary
                     )
@@ -1004,13 +990,12 @@ fun PlannerProgressRing(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Edge case: if total == 0, show no planner sentence
+        // Planner Status & Prediction Messages (No meme slot)
         if (total > 0) {
             val targetX = "${plannerStatus.targetPercent}%"
 
             when (plannerStatus.status) {
                 Status.SAFE -> {
-                    // SAFE: "You can skip N more classes and stay above X%."
                     Text(
                         text = "You can skip ${plannerStatus.canSkip} more classes and stay above $targetX.",
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
@@ -1020,7 +1005,6 @@ fun PlannerProgressRing(
                     )
                 }
                 Status.CLOSE -> {
-                    // CLOSE: "Careful! Only N classes left to skip before you drop below X%."
                     Text(
                         text = "Careful! Only ${plannerStatus.canSkip} classes left to skip before you drop below $targetX.",
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
@@ -1030,11 +1014,6 @@ fun PlannerProgressRing(
                     )
                 }
                 Status.BELOW -> {
-                    // BELOW: "Attend the next N classes in a row to get back to X%."
-                    // Below that:
-                    // "That's about D days (6 classes a day)"
-                    // "If you attend every class, you'll reach X% around <date> (estimate, holidays are not included)."
-                    // "After that you can skip M classes"
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -1045,7 +1024,7 @@ fun PlannerProgressRing(
                             textAlign = TextAlign.Center,
                             color = NrcmTheme.AbsentRed
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "That's about ${plannerStatus.daysNeeded} days (6 classes a day).",
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
@@ -1069,9 +1048,6 @@ fun PlannerProgressRing(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            MemeArea(status = plannerStatus.status, showMemes = showMemes)
         }
     }
 }
@@ -1085,7 +1061,6 @@ fun PlannerTab(
 ) {
     var targetPercent by remember { mutableStateOf(75) }
     var skipN by remember { mutableStateOf(0) }
-    var showMemes by remember { mutableStateOf(true) }
 
     val plannerStatus = buildPlannerStatus(semester.present, semester.total, targetPercent)
 
@@ -1094,16 +1069,16 @@ fun PlannerTab(
             .fillMaxSize()
             .background(NrcmTheme.Background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
-        PlannerProgressRing(plannerStatus, semester.total, showMemes)
+        PlannerProgressRing(plannerStatus, semester.total)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Target Percentage Selection (Never include 100)
+        // Target Percentage Selection (Refined FilterChips)
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -1122,6 +1097,7 @@ fun PlannerTab(
                             selected = targetPercent == target,
                             onClick = { targetPercent = target },
                             label = { Text("$target%") },
+                            shape = RoundedCornerShape(10.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = NrcmTheme.PrimaryLight,
                                 selectedLabelColor = NrcmTheme.Primary
@@ -1134,19 +1110,38 @@ fun PlannerTab(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // What-if Slider
+        // What-if Slider with Highlighted Prediction
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "What if I skip the next $skipN classes?",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = NrcmTheme.TextPrimary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "What if I skip classes?",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = NrcmTheme.TextPrimary
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(NrcmTheme.PrimaryLight, shape = RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "$skipN classes",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = NrcmTheme.Primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Slider(
                     value = skipN.toFloat(),
                     onValueChange = { skipN = it.toInt() },
@@ -1154,23 +1149,31 @@ fun PlannerTab(
                     steps = 29,
                     colors = SliderDefaults.colors(
                         thumbColor = NrcmTheme.Primary,
-                        activeTrackColor = NrcmTheme.Primary
+                        activeTrackColor = NrcmTheme.Primary,
+                        inactiveTrackColor = NrcmTheme.Border
                     )
                 )
 
                 val whatIfPct = whatIf(semester.present, semester.total, skipN)
                 val isBelow = whatIfPct < targetPercent
                 val whatIfColor = if (isBelow) NrcmTheme.AbsentRed else NrcmTheme.PresentGreen
+                val badgeBg = if (isBelow) NrcmTheme.AbsentBg else NrcmTheme.PresentBg
 
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Highlighted Predicted Attendance Card
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(badgeBg, shape = RoundedCornerShape(8.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Predicted New Attendance:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = NrcmTheme.TextSecondary
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                        color = NrcmTheme.TextPrimary
                     )
                     Text(
                         text = String.format(Locale.US, "%.2f%%", whatIfPct),
@@ -1183,10 +1186,10 @@ fun PlannerTab(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Per-Month Breakdown (comes from parsed months)
+        // Per-Month Breakdown (Accessible and never covered by navigation)
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = NrcmTheme.CardBg)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -1207,7 +1210,7 @@ fun PlannerTab(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 6.dp),
+                            .padding(vertical = 7.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1230,7 +1233,8 @@ fun PlannerTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Generous bottom spacer so monthly breakdown is fully visible above navigation bar
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
